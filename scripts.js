@@ -311,7 +311,7 @@ const app = {
          switch (e.keyCode) {
             case 32:
                e.preventDefault();
-               audio.paused ? audio.play() : audio.pause();
+               playPause.click();
                break;
             case 37:
                e.preventDefault();

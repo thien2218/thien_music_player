@@ -213,7 +213,7 @@ header {
 }
 
 .playlist-header .material-symbols-rounded {
-   -webkit-text-fill-color: #333;
+   -webkit-text-fill-color: var(--text-color);
    opacity: .6;
 }
 
@@ -332,4 +332,16 @@ header {
    background-color: #ff92ba;
    border: 2px solid white;
    outline: .1px solid rgba(0, 0, 0, 0.3);
+}
+
+/* Remove animations for those who've turned them off */
+@media (prefers-reduced-motion: reduce) {
+   *,
+   *::before,
+   *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+   }
 }
