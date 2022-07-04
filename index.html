@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Music player</title>
+   <link rel="shortcut icon" href="#">
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,700,1,0" />
+   <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+   <div class="wrapper">
+      <div class="player">
+         <div class="player-wrapper flow">
+            <!-- Header and Thumbnail -->
+            <header>Now Playing</header>
+            <div class="thumbnail"></div>
+      
+            <!-- Song's title and author -->
+            <div class="song">
+               <h1 class="title"></h1>
+               <h2 class="author"></h2>
+            </div>
+            
+            <!-- Progress area -->
+            <div class="progress-area">
+               <div class="progress-bar">
+                  <div class="progress"></div>
+               </div>
+               
+               <div class="timer">
+                  <span id="begin"></span>
+                  <span id="end"></span>
+               </div>
+            </div>
+      
+            <!-- Controls -->
+            <div class="control">
+               <span id="open-playlist" class="material-symbols-rounded">queue_music</span>
+               <span id="prev" class="material-symbols-rounded">skip_previous</span>
+               <div class="play-pause">
+                  <span id="play-pause" class="material-symbols-rounded">play_circle</span>
+               </div>
+               <span id="next" class="material-symbols-rounded">skip_next</span>
+               <span id="song-flow" class="material-symbols-rounded">repeat</span>
+            </div>
+      
+            <!-- Volume -->
+            <div class="volume-area">
+               <span id="volume-icon" class="material-symbols-rounded">volume_up</span>
+               <div class="volume-bar">
+                  <div class="volume"></div>
+               </div>
+            </div>
+            <audio id="audio" src="" preload="metadata"></audio>
+         </div>
+
+         <div class="playlist">
+            <div class="playlist-header">
+               <div style="display: flex; align-items: center;">
+                  <span class="material-symbols-rounded">queue_music</span>
+                  <span>My playlist</span>
+               </div>
+               <span id="close-playlist" class="material-symbols-rounded">close</span>
+            </div>
+
+            <div class="playlist-wrapper"></div>
+         </div>
+      </div>
+
+      <!-- <div class="playlist flow"></div> -->
+   </div>
+
+   <script src="./scripts.js"></script>
+</body>
+</html>
