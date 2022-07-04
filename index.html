@@ -14,13 +14,13 @@
       <div class="player">
          <div class="player-wrapper flow">
             <!-- Header and Thumbnail -->
-            <header>Now Playing</header>
+            <h1 class="header">Now Playing</h1>
             <div class="thumbnail"></div>
       
             <!-- Song's title and author -->
             <div class="song">
-               <h1 class="title"></h1>
-               <h2 class="author"></h2>
+               <h2 class="title"></h2>
+               <h3 class="author"></h3>
             </div>
             
             <!-- Progress area -->
@@ -39,9 +39,7 @@
             <div class="control">
                <span id="open-playlist" class="material-symbols-rounded">queue_music</span>
                <span id="prev" class="material-symbols-rounded">skip_previous</span>
-               <div class="play-pause">
-                  <span id="play-pause" class="material-symbols-rounded">play_circle</span>
-               </div>
+               <span id="play-pause" class="material-symbols-rounded">play_circle</span>
                <span id="next" class="material-symbols-rounded">skip_next</span>
                <span id="song-flow" class="material-symbols-rounded">repeat</span>
             </div>
@@ -65,7 +63,7 @@
                <span id="close-playlist" class="material-symbols-rounded">close</span>
             </div>
 
-            <div class="playlist-wrapper"></div>
+            <ul class="playlist-wrapper"></ul>
          </div>
       </div>
 

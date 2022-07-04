@@ -1,8 +1,3 @@
-/** TASKS:
- * Add all volume events and states
- * Add dragging event for volume and pause on keydown event for space bar
- */
-
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
@@ -164,12 +159,6 @@ const app = {
       const rounded = Math.floor(duration);
       return `${Math.floor(rounded/60) >= 10 ? Math.floor(rounded/60) : '0' + Math.floor(rounded/60)}:${rounded%60 >= 10 ? rounded%60 : '0' + rounded%60}`;
    },
-   // Currently played song
-   setCurrentSong() {
-      Object.defineProperty(this, 'currentSong', {
-         get() { return this.songs[this.currentIndex] },
-      });
-   },
    // Function runs every time song change event happens
    setChangeSong(newIndex) {
       $$('.play-indicator')[this.currentIndex].innerHTML = this.timerFormat($$('.song-length')[this.currentIndex].duration);
@@ -222,10 +211,7 @@ const app = {
                newIndex = Math.floor(Math.random() * this.songs.length);
             } while (newIndex === this.currentIndex);
             this.setChangeSong(newIndex);
-         } else { 
-            if(this.currentIndex === this.songs.length-1) this.setChangeSong(0);
-            else this.setChangeSong(this.currentIndex + 1);
-         };
+         } else next.click();
       }
       // Play and pause event
       audio.onplay = () => {
@@ -241,11 +227,14 @@ const app = {
          playlist.classList.add('active');
          if(!this.isScrolled) {
             setTimeout(() => {
-               $$('.playlist-item')[this.currentIndex].scrollIntoView({behavior: "smooth", block: "center"});
+               $$('.playlist-item')[this.currentIndex].scrollIntoView({
+                  behavior: "smooth",
+                  block: "center"
+               });
             }, 200);
             this.isScrolled = true;
          }
-      };
+      }
       closePlaylist.onclick = () => playlist.classList.remove('active');
       // Skip to next or previous song
       next.onclick = () => {
@@ -282,29 +271,17 @@ const app = {
          isHoldingProgress = true;
          audio.currentTime = (e.offsetX/e.target.offsetWidth)*audio.duration;
       }
+      // Dragging event
+      volumeBar.onmousemove = (e) => {
+         if(isHoldingVolume) audio.volume = e.offsetX/e.target.offsetWidth;
+      }
+      progressBar.onmousemove = (e) => {
+         if(isHoldingProgress) audio.currentTime = (e.offsetX/e.target.offsetWidth)*audio.duration;
+      }
       // Mouse up event
       window.onmouseup = () => {
          isHoldingProgress = false;
          isHoldingVolume = false;
-      }
-      volumeBar.onmouseup = () => { 
-         isHoldingProgress = false;
-         isHoldingVolume = false;
-      }
-      progressBar.onmouseup = () => { 
-         isHoldingProgress = false;
-         isHoldingVolume = false;
-      }
-      // Dragging event
-      volumeBar.onmousemove = (e) => {
-         if(isHoldingVolume) {
-            audio.volume = e.offsetX/e.target.offsetWidth;
-         }
-      }
-      progressBar.onmousemove = (e) => {
-         if(isHoldingProgress) {
-            audio.currentTime = (e.offsetX/e.target.offsetWidth)*audio.duration;
-         }
       }
       // Accessibility events with space bar, up and down key
       window.onkeydown = (e) => {
@@ -336,18 +313,15 @@ const app = {
    renderPlaylist() {
       const htmls = this.songs.map(song => {
          return `
-            <div class="playlist-item">
+            <li class="playlist-item">
+               <div class="playlist-thumb" style="background-image: url(${song.image})"></div>
                <div class="song-info">
-                  <div class="playlist-thumb"
-                  style="background-image: url(${song.image})"></div>
-                  <div>
-                     <span class="playlist-title">${song.title}</span>
-                     <span class="playlist-author">${song.author}</span>
-                  </div>
+                  <span class="playlist-title">${song.title}</span>
+                  <span class="playlist-author">${song.author}</span>
                </div>
                <audio class="song-length" preload="metadata" src=${song.path}></audio>
                <span class="play-indicator"></span>
-            </div>
+            </li>
          `
       }).join('');
 
@@ -363,18 +337,18 @@ const app = {
    },
    // Render the player
    renderPlayer() {
-      thumbnail.style.backgroundImage = `url(${this.currentSong.image})`;
-      title.innerText = this.currentSong.title;
-      author.innerText = this.currentSong.author;
-      audio.src = this.currentSong.path;
+      const currentSong = this.songs[this.currentIndex];
+      thumbnail.style.backgroundImage = `url(${currentSong.image})`;
+      title.innerText = currentSong.title;
+      author.innerText = currentSong.author;
+      audio.src = currentSong.path;
    },
 
    start() {
-      this.setCurrentSong();
       this.renderPlayer();
       this.renderPlaylist();
       this.eventHandler();
-      // Initialize the volume state
+      // Initialize the volume
       audio.volume = 0.5;
    }
 }

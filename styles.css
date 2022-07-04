@@ -1,9 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-:root {
-   --text-color: #333;
-}
-
+/* Resets */
 * {
    padding: 0;
    margin: 0;
@@ -17,7 +14,7 @@ html {
 
 body {
    background-color: #f5f5f5;
-   color: var(--text-color);
+   color: #333;
    line-height: 1;
 }
 
@@ -66,7 +63,7 @@ body {
 }
 
 /* Header */
-header {
+.header {
    font-size: 1.125rem;
    font-weight: 300;
 }
@@ -164,7 +161,7 @@ header {
    cursor: pointer;
 }
 
-.play-pause .material-symbols-rounded {
+#play-pause {
    font-size: 3.25rem;
 }
 
@@ -213,7 +210,7 @@ header {
 }
 
 .playlist-header .material-symbols-rounded {
-   -webkit-text-fill-color: var(--text-color);
+   -webkit-text-fill-color: #333;
    opacity: .6;
 }
 
@@ -263,8 +260,7 @@ header {
 }
 
 .song-info {
-   display: flex;
-   align-items: center;
+   flex-grow: 1;
 }
 
 /* Playlist sound wave */
