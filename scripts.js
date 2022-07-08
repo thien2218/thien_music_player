@@ -19,20 +19,18 @@ const songFlow = $('#song-flow');
 const volumeIcon = $('#volume-icon');
 const volumeBar = $('.volume-bar');
 const progressBar = $('.progress-bar');
-const next = $('#next');
-const prev = $('#prev');
+const nextBtn = $('#next');
+const prevBtn = $('#prev');
 const openPlaylist = $('#open-playlist');
 const closePlaylist = $('#close-playlist');
 
-// Sound wave animation element
-const wave = `
-   <div class="wave">
-      <span class="stroke"></span>
-      <span class="stroke"></span>
-      <span class="stroke"></span>
-      <span class="stroke"></span>
-      <span class="stroke"></span>
-   </div>
+// Sound wave strokes
+const strokes = `
+   <span class="stroke"></span>
+   <span class="stroke"></span>
+   <span class="stroke"></span>
+   <span class="stroke"></span>
+   <span class="stroke"></span>
 `
 // Mouse holding state for progress and volume bar
 let isHoldingProgress = false;
@@ -41,14 +39,18 @@ let isHoldingVolume = false;
 const app = {
    // Current song index
    currentIndex: 0,
+
    // Control state
    songFlowStates: ['repeat','repeat_one','shuffle'],
    songFlowIndex: 0,
+
    // Volume state
    volumeState: 'volume_up',
    volumeOff: false,
+
    // Playlist is scrolled state
    isScrolled: true,
+
    // My playlist
    songs: [
       {
@@ -154,65 +156,79 @@ const app = {
          image: './image/image16.jpg'
       },
    ],
+
    // Setting timer format
    timerFormat(duration) {
       const rounded = Math.floor(duration);
       return `${Math.floor(rounded/60) >= 10 ? Math.floor(rounded/60) : '0' + Math.floor(rounded/60)}:${rounded%60 >= 10 ? rounded%60 : '0' + rounded%60}`;
    },
+
    // Function runs every time song change event happens
    setChangeSong(newIndex) {
-      $$('.play-indicator')[this.currentIndex].innerHTML = this.timerFormat($$('.song-length')[this.currentIndex].duration);
+      $$('.wave')[this.currentIndex].innerHTML = this.timerFormat($$('.duration-display')[this.currentIndex].duration);
       this.currentIndex = newIndex;
-      $$('.play-indicator')[this.currentIndex].innerHTML = wave;
+      $$('.wave')[this.currentIndex].innerHTML = strokes;
       this.renderPlayer();
       this.isScrolled = false;
       audio.play();
    },
+
    // Handle events function
    eventHandler() {
       const playListItems = $$('.playlist-item');
+
       // Change song every time a song is clicked
       playListItems.forEach((playListItem, index) => {
          playListItem.onclick = () => {
             this.setChangeSong(index);
          }
       })
-      // 
+
+      // Spinning animation of the thumbnail
       const thumbnailAnimation = thumbnail.animate([{
          transform: 'rotate(360deg)'
       }], {
          duration: 8000,
          iterations: Infinity
       })
+
+      // Animation paused when initialized
       thumbnailAnimation.pause();
+
       // Updates song's duration when audio's metadata first update
       audio.onloadedmetadata = () => {
+         $('#begin').innerText = this.timerFormat(audio.currentTime);
          $('#end').innerText = this.timerFormat(audio.duration);
       }
-      // Updates current time and progress bar
-      audio.ontimeupdate = (e) => {
-         const currentTime = e.target.currentTime;
-         const duration = e.target.duration;
-         let progressBarWidth = (currentTime/duration)*100;
 
-         $('#begin').innerText = this.timerFormat(currentTime);
+      // Updates current time and progress bar
+      audio.ontimeupdate = () => {
+         let progressBarWidth = (audio.currentTime/audio.duration)*100;
+         $('#begin').innerText = this.timerFormat(audio.currentTime);
          $('.progress').style.width = `${progressBarWidth}%`;
       }
+
       // Volume change event
       audio.onvolumechange = () => {
-         volumeIcon.innerText = audio.volume >= 0.5 ? 'volume_up' : audio.volume < 0.05 ? 'volume_mute' : 'volume_down';
+         if(audio.muted) volumeIcon.innerHTML = 'volume_off';
+         else volumeIcon.innerText = audio.volume >= 0.5 ? 'volume_up' : 
+                                     audio.volume < 0.05 ? 'volume_mute' : 'volume_down';
          $('.volume').style.width = `${audio.volume*100}%`;
       }
+
       // Song's change flow every time a song is ended
       audio.onended = () => {
          if(this.songFlowIndex === 2) {
+            // Making sure that the song is not repeated
             let newIndex;
             do {
                newIndex = Math.floor(Math.random() * this.songs.length);
             } while (newIndex === this.currentIndex);
+
             this.setChangeSong(newIndex);
-         } else next.click();
+         } else nextBtn.click();
       }
+
       // Play and pause event
       audio.onplay = () => {
          playPause.innerText = 'pause_circle';
@@ -222,9 +238,11 @@ const app = {
          playPause.innerText = 'play_circle';
          thumbnailAnimation.pause();
       }
-      // Open and close playlist
+
+      // Open playlist
       openPlaylist.onclick = () => {
          playlist.classList.add('active');
+
          if(!this.isScrolled) {
             setTimeout(() => {
                $$('.playlist-item')[this.currentIndex].scrollIntoView({
@@ -232,19 +250,24 @@ const app = {
                   block: "center"
                });
             }, 200);
+
             this.isScrolled = true;
          }
       }
+
+      // Clost playlist
       closePlaylist.onclick = () => playlist.classList.remove('active');
+
       // Skip to next or previous song
-      next.onclick = () => {
+      nextBtn.onclick = () => {
          if(this.currentIndex === this.songs.length-1) this.setChangeSong(0);
          else this.setChangeSong(this.currentIndex + 1);
       }
-      prev.onclick = () => {
+      prevBtn.onclick = () => {
          if(this.currentIndex === 0) this.setChangeSong(this.songs.length-1);
          else this.setChangeSong(this.currentIndex - 1);
       }
+
       // Change the flow state
       songFlow.onclick = () => {
          this.songFlowIndex = this.songFlowIndex+1 > 2 ? 0 : this.songFlowIndex+1;
@@ -252,16 +275,18 @@ const app = {
          if(this.songFlowIndex === 1) audio.loop = true;
          else audio.loop = false;
       }
+
       // Play pause button event
       playPause.onclick = () => {
          audio.paused ? audio.play() : audio.pause();
       }
+
       // Turn on and off the volume
       volumeIcon.onclick = () => {
-         this.volumeOff = !this.volumeOff;
-         audio.muted = this.volumeOff;
-         volumeIcon.innerText = this.volumeOff ? 'volume_off' : this.volumeState;
+         audio.muted = !audio.muted;
       }
+
+      // ----------------DRAGGING ANIMATION ON PROGRESS AND VOLUME BAR----------------
       // Mouse down event
       volumeBar.onmousedown = (e) => {
          isHoldingVolume = true;
@@ -271,6 +296,7 @@ const app = {
          isHoldingProgress = true;
          audio.currentTime = (e.offsetX/e.target.offsetWidth)*audio.duration;
       }
+
       // Dragging event
       volumeBar.onmousemove = (e) => {
          if(isHoldingVolume) audio.volume = e.offsetX/e.target.offsetWidth;
@@ -278,12 +304,14 @@ const app = {
       progressBar.onmousemove = (e) => {
          if(isHoldingProgress) audio.currentTime = (e.offsetX/e.target.offsetWidth)*audio.duration;
       }
+
       // Mouse up event
       window.onmouseup = () => {
          isHoldingProgress = false;
          isHoldingVolume = false;
       }
-      // Accessibility events with space bar, up and down key
+
+      // Accessibility improvement with keydown events on space bar & arrow keys
       window.onkeydown = (e) => {
          switch (e.keyCode) {
             case 32:
@@ -309,7 +337,8 @@ const app = {
          }
       }
    },
-   // Render the song list
+
+   // Render the song playlist
    renderPlaylist() {
       const htmls = this.songs.map(song => {
          return `
@@ -319,22 +348,25 @@ const app = {
                   <span class="playlist-title">${song.title}</span>
                   <span class="playlist-author">${song.author}</span>
                </div>
-               <audio class="song-length" preload="metadata" src=${song.path}></audio>
-               <span class="play-indicator"></span>
+               <audio class="duration-display" preload="metadata" src=${song.path}></audio>
+               <div class="wave"></div>
             </li>
          `
       }).join('');
 
       playlistWrapper.innerHTML = htmls;
-      const audios = $$('.song-length');
-      const playIndicator = $$('.play-indicator');
-      // Initialize is playing state for every song in playlist
-      audios.forEach((audio, index) => {
-         audio.onloadedmetadata = () => {
-            playIndicator[index].innerHTML = index === this.currentIndex ? wave : this.timerFormat(audio.duration);
+      const durations = $$('.duration-display');
+      const wave = $$('.wave');
+
+      // Initialize isPlaying state and add song's duration at the end for every song in
+      // the playlist
+      durations.forEach((duration, index) => {
+         duration.onloadedmetadata = () => {
+            wave[index].innerHTML = index === this.currentIndex ? strokes : this.timerFormat(duration.duration);
          }
       })
    },
+
    // Render the player
    renderPlayer() {
       const currentSong = this.songs[this.currentIndex];
@@ -348,9 +380,14 @@ const app = {
       this.renderPlayer();
       this.renderPlaylist();
       this.eventHandler();
-      // Initialize the volume
+
+      // Initialize the default volume
       audio.volume = 0.5;
    }
 }
 
 app.start();
+
+/** P/S:
+ * - audio.volume only works on desktop devices for some reasons
+ */
